@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/NavBar" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/NavBar">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/feedIcon"
+            android:src="@drawable/feed_icon"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/SearchIcon"
+            android:src="@drawable/search_icon"
+            android:layout_alignTop="@+id/feedIcon"
+            android:layout_toRightOf="@+id/feedIcon"
+            android:layout_toEndOf="@+id/feedIcon"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/PostIcon"
+            android:src="@drawable/post_icon"
+            android:layout_alignTop="@+id/SearchIcon"
+            android:layout_toRightOf="@+id/SearchIcon"
+            android:layout_toEndOf="@+id/SearchIcon"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/NotIcon"
+            android:src="@drawable/notification_icon"
+            android:layout_alignTop="@+id/PostIcon"
+            android:layout_toRightOf="@+id/PostIcon"
+            android:layout_toEndOf="@+id/PostIcon"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/ProfileIcon"
+            android:src="@drawable/profile_icon"
+            android:layout_alignTop="@+id/NotIcon"
+            android:layout_toRightOf="@+id/NotIcon"
+            android:layout_toEndOf="@+id/NotIcon"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            />
+    </LinearLayout>
+
+</RelativeLayout>

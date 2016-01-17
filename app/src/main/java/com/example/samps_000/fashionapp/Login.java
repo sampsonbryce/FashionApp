@@ -145,9 +145,13 @@ public class Login extends Activity {
             }
 
             if (top != null && top.equals("Account Exists")){
+
                 //Start App
-                Intent i = new Intent(Login.this, Feed.class);
                 Log.d("Verification", response);
+
+                Intent i = new Intent(Login.this, Feed.class);
+                startActivity(i);
+
             }
             else{
                 Log.d("Errors", response);
