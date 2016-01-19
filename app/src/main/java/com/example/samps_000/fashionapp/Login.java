@@ -71,7 +71,7 @@ public class Login extends Activity {
 
             try {
                 Log.d("checks", "check1");
-                URL url = new URL("http://10.0.2.2/PHPProjects/Login.php");
+                URL url = new URL("http://10.0.2.2/PHPProjects/SnapStyle/Login.php");
                 JSONObject jObject = new JSONObject();
                 jObject.put("Email", EmailText);
                 jObject.put("Pass", PassText);
@@ -133,25 +133,31 @@ public class Login extends Activity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            String[] data = response.split("\\:");
 
-            String top = null;
-            String id = null;
+            if (response != null && !response.isEmpty()) {
+                String[] data = response.split("\\:");
 
-            if(data.length > 1) {
+                String top = null;
+                String id = null;
 
-                top = data[0];
-                id = data[1];
+                if (data.length > 1) {
+
+                    top = data[0];
+                    id = data[1];
+                }
+
+                if (top != null && top.equals("Account Exists")) {
+
+                    //Start App
+                    Log.d("Verification", response);
+
+                    Intent i = new Intent(Login.this, Feed.class);
+                    startActivity(i);
+
+                }
             }
-
-            if (top != null && top.equals("Account Exists")){
-
-                //Start App
-                Log.d("Verification", response);
-
-                Intent i = new Intent(Login.this, Feed.class);
-                startActivity(i);
-
+            else if(response == null){
+               Log.d("Errors", "No Response From Server");
             }
             else{
                 Log.d("Errors", response);

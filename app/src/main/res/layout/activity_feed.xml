@@ -54,7 +54,7 @@
             android:layout_toEndOf="@+id/SearchIcon"
             android:layout_weight="1"
             android:scaleType="fitXY"
-            />
+            android:onClick="postIconClicked" />
 
         <ImageView
             android:layout_width="0dp"
