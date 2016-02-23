@@ -27,6 +27,10 @@ import org.json.JSONObject;
  * Created by samps_000 on 1/7/2016.
  */
 public class CreateAccount extends Activity {
+
+    String SERVER_URL = "http://ec2-52-33-232-213.us-west-2.compute.amazonaws.com";
+    String CREATE_ACCOUNT_EXT = "/create_account";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +45,7 @@ public class CreateAccount extends Activity {
     protected class Create extends AsyncTask<Void, Void, Void> {
 
         String response = null;
+        int status;
 
         final EditText Name = (EditText) findViewById(R.id.name);
         final EditText Email = (EditText) findViewById(R.id.email);
@@ -62,13 +67,12 @@ public class CreateAccount extends Activity {
             @Override
             protected Void doInBackground (Void... params){
 
-            OutputStream os = null;
             InputStreamReader is = null;
             HttpURLConnection conn = null;
 
             try {
-                Log.d("checks", "check1");
-                URL url = new URL("http://10.0.2.2/PHPProjects/CreateAccount.php");
+                Log.d("checks", "Create URL: " + SERVER_URL + CREATE_ACCOUNT_EXT);
+                URL url = new URL(SERVER_URL + CREATE_ACCOUNT_EXT);
                 JSONObject jObject = new JSONObject();
                 jObject.put("Name", NameText);
                 jObject.put("Email", EmailText);
@@ -77,6 +81,7 @@ public class CreateAccount extends Activity {
 
                 String text = jObject.toString();
 
+                Log.d("checks", "Create new connection");
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(10000 /*milliseconds*/);
                 conn.setConnectTimeout(15000 /* milliseconds */);
@@ -85,35 +90,44 @@ public class CreateAccount extends Activity {
                 conn.setDoOutput(true);
                 conn.setFixedLengthStreamingMode(text.getBytes().length);
 
-                Log.d("checks", "check2");
 
-                conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-                conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+                conn.setRequestProperty("Content-Type", "application/json");
+                //conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
 
+                //os = new BufferedOutputStream(conn.getOutputStream());
+                OutputStream os = conn.getOutputStream();
+                os.write(text.getBytes("UTF-8"));
+
+                Log.d("checks", "Write Json object in string");
+
+                //os.write(text.getBytes());
+                os.flush();
+                os.close();
+                Log.d("CHECK", text);
+                Log.d("CHECK", os.toString());
+
+                Log.d("checks", "Connect");
                 conn.connect();
 
-                os = new BufferedOutputStream(conn.getOutputStream());
-                os.write(text.getBytes());
-
-                os.flush();
-
-
                 //Get Repsonse
+
+                Log.d("checks", "Get Response");
+                status = conn.getResponseCode();
                 is = new InputStreamReader(conn.getInputStream());
                 BufferedReader reader = new BufferedReader(is);
 
                 String line = "";
 
                 StringBuilder sb = new StringBuilder();
+
                 while ((line = reader.readLine()) != null) {
                     sb.append(line + "\n");
                 }
                 // Response from server after create process will be stored in response variable.
+                Log.d("checks", "Convert response to string");
                 response = sb.toString();
+                Log.d("Response: ", response);
 
-                Log.d("checks", "check3");
-
-                Log.d("Response", response);
 
 
             } catch (MalformedURLException e) {
@@ -150,11 +164,13 @@ public class CreateAccount extends Activity {
         }
 
         private void reply() {
-
-            if (response.equals("Username Already Exists") || response.equals("Email Already In Use"))
-
+            if (response == null){
+                Log.d("Errors", "response == null");
+            }
+            else if (status != 200)
             {
-                Toast.makeText(CreateAccount.this, response, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateAccount.this, "Could not create account. :(", Toast.LENGTH_SHORT).show();
+                Log.d("Status Code: ", Integer.toString(status));
             }
             else
             {
