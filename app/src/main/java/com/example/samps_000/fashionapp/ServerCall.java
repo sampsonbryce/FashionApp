@@ -18,12 +18,12 @@ import java.util.List;
  * Created by samps_000 on 2/23/2016.
  */
 public class ServerCall extends AsyncTask<String, Void, List> {
+    private static final int HTTP_BAD_REQUEST = 400;
     private OnServerCallCompleted listener;
 
     public ServerCall(OnServerCallCompleted listener){
         this.listener = listener;
     }
-
 
 
     @Override
@@ -39,14 +39,14 @@ public class ServerCall extends AsyncTask<String, Void, List> {
             req_method = params[2];
         }
 
-        String response = null;
+        String response;
         int status;
         List<String> list = new ArrayList<>();
 
-        String SERVER_URL = "http://ec2-52-33-232-213.us-west-2.compute.amazonaws.com";
+        String SERVER_URL = "http://ec2-52-33-232-213.us-west-2.compute.amazonaws.com:3000";
 
-        InputStreamReader is = null;
-        HttpURLConnection conn = null;
+        InputStreamReader is;
+        HttpURLConnection conn;
 
         try {
             Log.d("checks", "Create URL: " + SERVER_URL + ext);
@@ -57,7 +57,7 @@ public class ServerCall extends AsyncTask<String, Void, List> {
             conn.setReadTimeout(10000 /*milliseconds*/);
             conn.setConnectTimeout(15000 /* milliseconds */);
             conn.setDoInput(true);
-            conn.setDoOutput(true);
+            conn.setDoOutput(false);
             conn.setFixedLengthStreamingMode(json_string.getBytes().length);
             conn.setRequestProperty("Content-Type", "application/json");
             if (req_method != null) {
@@ -84,11 +84,18 @@ public class ServerCall extends AsyncTask<String, Void, List> {
 
             Log.d("checks", "Get Response");
             status = conn.getResponseCode();
+            Log.d("checks", "STATUS:" + status);
             list.add(Integer.toString(status));
-            is = new InputStreamReader(conn.getInputStream());
+            Log.d("checks", "conn" + conn);
+            if (status >= HTTP_BAD_REQUEST){
+                is = new InputStreamReader(conn.getErrorStream());
+            }
+            else {
+                is = new InputStreamReader(conn.getInputStream());
+            }
             BufferedReader reader = new BufferedReader(is);
 
-            String line = "";
+            String line;
 
             StringBuilder sb = new StringBuilder();
 
@@ -106,7 +113,7 @@ public class ServerCall extends AsyncTask<String, Void, List> {
             //e.printStackTrace();
             Log.d("Exceptions", "M_URL_E: " + e.toString());
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             Log.d("Exceptions", "IO_E: " + e.toString());
         }
         return list;
