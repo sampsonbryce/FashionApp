@@ -19,9 +19,10 @@ import java.util.List;
  */
 public class ServerCall extends AsyncTask<String, Void, List> {
     private static final int HTTP_BAD_REQUEST = 400;
+    private static final int HTTP_INTERNAL_ERROR = 500;
     private OnServerCallCompleted listener;
 
-    public ServerCall(OnServerCallCompleted listener){
+    public ServerCall(OnServerCallCompleted listener) {
         this.listener = listener;
     }
 
@@ -87,10 +88,9 @@ public class ServerCall extends AsyncTask<String, Void, List> {
             Log.d("checks", "STATUS:" + status);
             list.add(Integer.toString(status));
             Log.d("checks", "conn" + conn);
-            if (status >= HTTP_BAD_REQUEST){
+            if (status >= HTTP_BAD_REQUEST) {
                 is = new InputStreamReader(conn.getErrorStream());
-            }
-            else {
+            } else {
                 is = new InputStreamReader(conn.getInputStream());
             }
             BufferedReader reader = new BufferedReader(is);
@@ -121,20 +121,25 @@ public class ServerCall extends AsyncTask<String, Void, List> {
 
     @Override
     protected void onPostExecute(List response_list) {
-        int status = Integer.valueOf((String) response_list.get(0));
-        String response = null;
-        if (response_list.size() < 2){
-            Log.d("errors", "No response string from server");
+        int status;
+        if (response_list.size() != 0) {
+
+            status = Integer.valueOf((String) response_list.get(0));
+            String response = null;
+            if (response_list.size() < 2) {
+                Log.d("errors", "No response string from server");
+            } else {
+                response = (String) response_list.get(1);
+                Log.d("response", String.valueOf(status) + " " + response);
+            }
+            if (response_list.size() > 1 && response == null) {
+                Log.d("Errors", "response == null");
+            }
         }
-        else {
-            response = (String) response_list.get(1);
-            Log.d("response", String.valueOf(status) + " " + response);
+        else{
+            status = HTTP_INTERNAL_ERROR;
         }
-        if (response_list.size() > 1 && response == null) {
-            Log.d("Errors", "response == null");
-        } else {
-            listener.PerformResponse(status);
-        }
+        listener.PerformResponse(status);
     }
 }
 

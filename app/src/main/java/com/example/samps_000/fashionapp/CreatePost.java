@@ -12,6 +12,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,12 +33,14 @@ import java.net.URL;
 /**
  * Created by samps_000 on 1/16/2016.
  */
-public class CreatePost extends Activity {
+public class CreatePost extends Activity implements OnServerCallCompleted {
 
     public static final int IMAGE_GALLERY_REQUEST = 20;
     private ImageView postPicture;
 
     private Bitmap postImage = null;
+
+    private static final String POST_EXT = "/post";
 
 
     @Override
@@ -48,7 +51,7 @@ public class CreatePost extends Activity {
         postPicture = (ImageView) findViewById(R.id.postImage);
     }
 
-    public void selectImageClicked(View view){
+    public void selectImageClicked(View view) {
         //invoke the image gallery using an implicit intent
         Intent imageSelector = new Intent(Intent.ACTION_PICK);
 
@@ -63,7 +66,6 @@ public class CreatePost extends Activity {
         imageSelector.setDataAndType(data, "image/*");
 
         startActivityForResult(imageSelector, IMAGE_GALLERY_REQUEST);
-
     }
 
     @Override
@@ -71,14 +73,13 @@ public class CreatePost extends Activity {
 
         Log.d("checks", "check4");
 
-        if(resultCode == RESULT_OK){
+        if (resultCode == RESULT_OK) {
             //everything went ok
 
             Log.d("checks", "check5");
 
-            if(requestCode == IMAGE_GALLERY_REQUEST){
+            if (requestCode == IMAGE_GALLERY_REQUEST) {
                 //if we are here, results are from image gallery
-
 
                 //address of image on sd card
                 Uri imageURI = data.getData();
@@ -90,7 +91,9 @@ public class CreatePost extends Activity {
                     inputStream = getContentResolver().openInputStream(imageURI);
 
                     //get a bitmap from the stream
-                    Bitmap image = BitmapFactory.decodeStream(inputStream);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 8;
+                    Bitmap image = BitmapFactory.decodeStream(inputStream, null, options);
 
                     //Set image
                     postPicture.setImageBitmap(image);
@@ -104,13 +107,21 @@ public class CreatePost extends Activity {
         }
     }
 
-    public void postClicked(View view){
+    public void postClicked(View view) {
 
         String imageEncoded = encodeToString(postImage);
-        new sendToServer().execute(imageEncoded);
+        postImage.recycle();
+        //new sendToServer().execute(imageEncoded);
+        JSONObject jObject = new JSONObject();
+        try {
+            jObject.put("image", imageEncoded);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        new ServerCall(CreatePost.this).execute(jObject.toString(), POST_EXT, "POST");
     }
 
-    private String encodeToString(final Bitmap b){
+    private String encodeToString(final Bitmap b) {
         //Might need to make this run on thread
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -121,82 +132,19 @@ public class CreatePost extends Activity {
         return encodedString;
     }
 
+    @Override
+    public void PerformResponse(int status) {
+        if (status == 200){
+            Toast.makeText(CreatePost.this, "POSTED", Toast.LENGTH_SHORT).show();
 
-    protected class sendToServer extends AsyncTask<String,Void,Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            OutputStream os = null;
-            InputStreamReader is = null;
-            HttpURLConnection conn = null;
-
-            try {
-                Log.d("checks", "check1");
-                URL url = new URL("http://10.0.2.2/PHPProjects/s3/upload.php");
-                JSONObject jObject = new JSONObject();
-
-                if (params[0] != null)
-                    Log.d("image", params[0]);
-                else
-                    Log.d("image", "No params");
-
-                jObject.put("image", params[0]);
-
-                String text = jObject.toString();
-
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /*milliseconds*/);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setFixedLengthStreamingMode(text.getBytes().length);
-
-                Log.d("checks", "check2");
-
-                conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-                conn.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-
-                conn.connect();
-
-                os = new BufferedOutputStream(conn.getOutputStream());
-                os.write(text.getBytes());
-
-                os.flush();
-
-
-                //Get Response
-                is = new InputStreamReader(conn.getInputStream());
-                BufferedReader reader = new BufferedReader(is);
-
-                String line = "";
-
-                StringBuilder sb = new StringBuilder();
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                // Response from server after create process will be stored in response variable.
-                String response = sb.toString();
-
-                Log.d("checks", "check3");
-
-                Log.d("Response", response);
-
-
-            } catch (MalformedURLException e) {
-                //e.printStackTrace();
-                Log.d("Exceptions", "M_URL_E: " + e.toString());
-            } catch (JSONException e) {
-                //e.printStackTrace();
-                Log.d("Exceptions", "JSON_E: " + e.toString());
-            } catch (IOException e) {
-                //e.printStackTrace();
-                Log.d("Exceptions", "IO_E: " + e.toString());
-            }
-            return null;
         }
-
-
+        else if(status == 500){
+            Toast.makeText(CreatePost.this, "Could not connect to server", Toast.LENGTH_SHORT).show();
+            Log.d("Status Code: ", Integer.toString(status));
+        }
+        else{
+            Toast.makeText(CreatePost.this, "Could not post! :(", Toast.LENGTH_SHORT).show();
+            Log.d("Status Code: ", Integer.toString(status));
+        }
     }
 }
