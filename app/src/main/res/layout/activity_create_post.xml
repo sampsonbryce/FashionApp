@@ -34,4 +34,13 @@
         android:layout_centerHorizontal="true"
         android:onClick="postClicked" />
 
+    <EditText
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/descText"
+        android:layout_below="@+id/layoutButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="43dp"
+        android:hint="Description" />
+
 </RelativeLayout>

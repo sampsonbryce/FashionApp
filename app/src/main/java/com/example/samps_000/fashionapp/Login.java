@@ -11,6 +11,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.stormpath.sdk.Stormpath;
+import com.stormpath.sdk.StormpathCallback;
+import com.stormpath.sdk.models.StormpathError;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,18 +23,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by samps_000 on 1/15/2016.
  */
-public class Login extends Activity implements OnServerCallCompleted{
+public class Login extends Activity implements OnServerCallCompleted {
 
     String LOGIN_EXT = "/login";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +56,7 @@ public class Login extends Activity implements OnServerCallCompleted{
         startActivity(i);
     }
 
-    public void loginClicked(View view) throws JSONException {
+    public void loginClicked(View view) throws JSONException, NoSuchAlgorithmException {
 
         EditText Email = (EditText) findViewById(R.id.loginEmail);
         EditText Pass = (EditText) findViewById(R.id.loginPassword);
@@ -56,28 +66,41 @@ public class Login extends Activity implements OnServerCallCompleted{
 
         JSONObject jObject = new JSONObject();
         jObject.put("Email", EmailText);
-        jObject.put("Pass", PassText);
 
         String text = jObject.toString();
+        Log.d("checks", "text"+text);
 
         ArrayList<EditText> edit_texts = new ArrayList<>();
 
         edit_texts.add(Email);
         edit_texts.add(Pass);
 
-        if(errors(edit_texts)) {
+
+        if (errors(edit_texts)) {
+            Stormpath.login(EmailText, PassText, new StormpathCallback<Void>() {
+
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Intent i = new Intent(Login.this, Feed.class);
+                    startActivity(i);
+                }
+
+                @Override
+                public void onFailure(StormpathError error) {
+                    Log.d("STORMPATH ERROR", error.message());
+                    Toast.makeText(Login.this, error.message(), Toast.LENGTH_LONG).show();
+                }
+            });
             new ServerCall(Login.this).execute(text, LOGIN_EXT, "POST");
         }
     }
 
     @Override
-    public void PerformResponse(int status){
+    public void PerformResponse(int status) {
         if (status != 200) {
             Toast.makeText(Login.this, R.string.failed_login_toast, Toast.LENGTH_SHORT).show();
             Log.d("Status Code: ", Integer.toString(status));
-        }
-        else
-        {
+        } else {
             Intent i = new Intent(Login.this, Feed.class);
             startActivity(i);
         }

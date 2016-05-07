@@ -13,12 +13,28 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.stormpath.sdk.Stormpath;
+import com.stormpath.sdk.StormpathCallback;
+import com.stormpath.sdk.models.StormpathError;
+import com.stormpath.sdk.models.UserProfile;
+
 public class Feed extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+        Stormpath.getUserProfile(new StormpathCallback<UserProfile>() {
+
+            @Override
+            public void onSuccess(UserProfile userProfile) {
+            }
+
+            @Override
+            public void onFailure(StormpathError error) {
+                // Something went wrong.
+            }
+        });
 
         setTitle("InStyle");
         ActionBar bar = getSupportActionBar();

@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -47,6 +48,9 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
+
+
+
 
         postPicture = (ImageView) findViewById(R.id.postImage);
     }
@@ -108,13 +112,17 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
     }
 
     public void postClicked(View view) {
+        //get description
+        EditText descEdit = (EditText) findViewById(R.id.descText);
 
+        //get image
         String imageEncoded = encodeToString(postImage);
         postImage.recycle();
-        //new sendToServer().execute(imageEncoded);
         JSONObject jObject = new JSONObject();
         try {
             jObject.put("image", imageEncoded);
+
+            jObject.put("desc", descEdit.getText());
         } catch (JSONException e) {
             e.printStackTrace();
         }
