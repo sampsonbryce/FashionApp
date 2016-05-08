@@ -2,6 +2,7 @@ package com.example.samps_000.fashionapp;
 
 import android.app.Activity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import android.content.Intent;
@@ -16,9 +17,21 @@ import com.stormpath.sdk.StormpathCallback;
 import com.stormpath.sdk.StormpathConfiguration;
 import com.stormpath.sdk.models.RegisterParams;
 import com.stormpath.sdk.models.StormpathError;
+import com.stormpath.sdk.models.UserProfile;
+import com.stormpath.sdk.utils.StringUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 import static android.widget.Toast.LENGTH_LONG;
 
@@ -26,17 +39,25 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateAccount extends Activity implements OnServerCallCompleted {
 
     String ADD_USER_EXT = "/add_user";
-    String SERVER_URL = "http://ec2-52-33-232-213.us-west-2.compute.amazonaws.com:3000";
+    String STORMPATH_EXT = "/stormpath";
+    private OkHttpClient okHttpClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
         // Initialize Stormpath
-        StormpathConfiguration stormpathConfiguration = new StormpathConfiguration.Builder()
-                .baseUrl(SERVER_URL)
-                .build();
-        Stormpath.init(this, stormpathConfiguration);
+        Log.d("BASE URL", this.getString(R.string.SERVER_URL));
+        if (!Stormpath.isInitialized()) {
+            StormpathConfiguration stormpathConfiguration = new StormpathConfiguration.Builder()
+                    .baseUrl(this.getString(R.string.SERVER_URL))
+                    .build();
+            Stormpath.init(this, stormpathConfiguration);
+        }
+
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        this.okHttpClient = new OkHttpClient.Builder().addNetworkInterceptor(httpLoggingInterceptor).build();
+
     }
 
     @Override
@@ -72,7 +93,7 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
         if (errors(firstName, lastName, Email, Pass, Cpass)) {
 
             JSONObject jObject = new JSONObject();
-            Log.d("values", firstNameText  + lastNameText + emailText +  passText);
+            Log.d("values", firstNameText + lastNameText + emailText + passText);
             jObject.put("Email", emailText);
 
             String text = jObject.toString();
@@ -82,8 +103,31 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
             Stormpath.register(registerParams, new StormpathCallback<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    Intent i = new Intent(CreateAccount.this, Feed.class);
-                    startActivity(i);
+                    Stormpath.login(emailText, passText, new StormpathCallback<Void>() {
+
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Stormpath.getUserProfile(new StormpathCallback<UserProfile>() {
+                                @Override
+                                public void onSuccess(UserProfile userProfile) {
+                                    Log.d("PROFILE", userProfile.getEmail());
+                                    add_user();
+                                }
+
+                                @Override
+                                public void onFailure(StormpathError error) {
+                                    Log.d("FAILED", "Failed to get user profile");
+                                }
+                            });
+
+                        }
+
+                        @Override
+                        public void onFailure(StormpathError error) {
+                            Log.d("FAILURE", "could not login");
+                        }
+                    });
+
                 }
 
                 @Override
@@ -93,7 +137,7 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
                 }
             });
 
-            new ServerCall(CreateAccount.this).execute(text, ADD_USER_EXT, "POST");
+            //new ServerCall(CreateAccount.this).execute(text, ADD_USER_EXT, "POST");
         }
     }
 
@@ -127,6 +171,53 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
             Toast.makeText(CreateAccount.this, R.string.success_create_account_toast, Toast.LENGTH_SHORT).show();
 
         }
+    }
+
+    HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+        @Override
+        public void log(String message) {
+            Stormpath.logger().d(message);
+        }
+    });
+
+
+    private void add_user() {
+        Log.d("ADDING USER", "adding user, " + this.getString(R.string.SERVER_URL) + "/add_user");
+        RequestBody requestBody = new FormBody.Builder()
+                .add("notes", "some notes")
+                .build();
+        Request request = new Request.Builder()
+                .url(this.getString(R.string.SERVER_URL) + "/add_user")
+                .headers(buildStandardHeaders(Stormpath.accessToken()))
+                .get()
+                .build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("FAILURE", "failed to call add_user" + e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+
+                Log.d("Sucess", "sucess calling add user" + response);
+                if (response.code() == 200) {
+                    Intent i = new Intent(CreateAccount.this, Feed.class);
+                    startActivity(i);
+                }
+            }
+        });
+    }
+
+    private Headers buildStandardHeaders(String accessToken) {
+        Headers.Builder builder = new Headers.Builder();
+        builder.add("Accept", "application/json");
+        if (StringUtils.isNotBlank(accessToken)) {
+            builder.add("Authorization", "Bearer " + accessToken);
+        }
+
+        return builder.build();
     }
 }
 

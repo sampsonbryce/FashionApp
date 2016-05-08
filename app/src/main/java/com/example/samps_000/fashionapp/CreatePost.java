@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.stormpath.sdk.Stormpath;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,9 +50,6 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
-
-
-
 
         postPicture = (ImageView) findViewById(R.id.postImage);
     }

@@ -54,6 +54,9 @@ public class Feed extends AppCompatActivity {
             // finally change the color
             window.setStatusBarColor(Color.parseColor("#26d9d9"));
         }
+
+        FeedItem feed_data[] = new FeedItem[]{};
+
     }
 
     public void postIconClicked(View view){
