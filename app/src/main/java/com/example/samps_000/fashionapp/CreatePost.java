@@ -15,23 +15,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.stormpath.sdk.Stormpath;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by samps_000 on 1/16/2016.
@@ -74,12 +69,8 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Log.d("checks", "check4");
-
         if (resultCode == RESULT_OK) {
             //everything went ok
-
-            Log.d("checks", "check5");
 
             if (requestCode == IMAGE_GALLERY_REQUEST) {
                 //if we are here, results are from image gallery
@@ -95,7 +86,7 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
 
                     //get a bitmap from the stream
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 8;
+                    options.inSampleSize = 2;
                     Bitmap image = BitmapFactory.decodeStream(inputStream, null, options);
 
                     //Set image
@@ -111,21 +102,44 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
     }
 
     public void postClicked(View view) {
+
         //get description
         EditText descEdit = (EditText) findViewById(R.id.descText);
+        EditText locationEdit = (EditText) findViewById(R.id.locationText);
 
         //get image
         String imageEncoded = encodeToString(postImage);
-        postImage.recycle();
-        JSONObject jObject = new JSONObject();
-        try {
-            jObject.put("image", imageEncoded);
 
-            jObject.put("desc", descEdit.getText());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        new ServerCall(CreatePost.this).execute(jObject.toString(), POST_EXT, "POST");
+        RequestBody requestBody = new FormBody.Builder()
+                .add("image", imageEncoded)
+                .add("desc", String.valueOf(descEdit.getText()))
+                .add("location", String.valueOf(locationEdit.getText()))
+                .build();
+
+        OkhttpServerRequest request_object = new OkhttpServerRequest(this, POST_EXT, requestBody);
+        Request request = request_object.getRequest();
+
+        request_object.getClient().newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("ERROR", "Could not post image " + e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if(response.code() == 200){
+                    postImage.recycle();
+                    Intent i = new Intent(CreatePost.this, Feed.class);
+                    startActivity(i);
+                }
+                else{
+                    Log.d("ERROR", "Error on success " + response.code() + " " + response.message());
+
+                }
+            }
+        });
+
     }
 
     private String encodeToString(final Bitmap b) {
@@ -133,7 +147,7 @@ public class CreatePost extends Activity implements OnServerCallCompleted {
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-        b.compress(Bitmap.CompressFormat.PNG, 50, stream);
+        b.compress(Bitmap.CompressFormat.WEBP, 80, stream);
         byte[] byte_arr = stream.toByteArray();
         String encodedString = Base64.encodeToString(byte_arr, 0);
         return encodedString;

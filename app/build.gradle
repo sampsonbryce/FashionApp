@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.samps_000.fashionapp"
-        minSdkVersion 8
+        minSdkVersion 14
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -45,5 +45,5 @@ dependencies {
     compile 'com.stormpath.sdk:stormpath-sdk-android:1.1.2'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.squareup.okhttp3:okhttp-urlconnection:3.2.0'
-
+    compile 'net.danlew:android.joda:2.9.3'
 }

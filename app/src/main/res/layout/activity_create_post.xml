@@ -8,6 +8,17 @@
         android:id="@+id/postImage"
         android:layout_alignParentTop="true" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Image"
+        android:id="@+id/selectImage"
+        android:layout_gravity="center_horizontal"
+        android:onClick="selectImageClicked"
+        android:layout_below="@+id/postImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -16,31 +27,36 @@
         android:gravity="center_horizontal"
         android:id="@+id/layoutButton">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Image"
-            android:id="@+id/selectImage"
-            android:layout_gravity="center_horizontal"
-            android:onClick="selectImageClicked" />
     </LinearLayout>
+
+    <EditText
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/descText"
+        android:layout_below="@+id/selectImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:hint="Description" />
+
+    <EditText
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/locationText"
+        android:layout_below="@+id/descText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:hint="Location"
+        android:maxLength="15" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Post"
         android:id="@+id/postButton"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentBottom="false"
         android:layout_centerHorizontal="true"
-        android:onClick="postClicked" />
-
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/descText"
-        android:layout_below="@+id/layoutButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="43dp"
-        android:hint="Description" />
+        android:onClick="postClicked"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/locationText" />
 
 </RelativeLayout>

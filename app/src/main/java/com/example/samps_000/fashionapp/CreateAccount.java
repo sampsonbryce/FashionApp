@@ -18,18 +18,14 @@ import com.stormpath.sdk.StormpathConfiguration;
 import com.stormpath.sdk.models.RegisterParams;
 import com.stormpath.sdk.models.StormpathError;
 import com.stormpath.sdk.models.UserProfile;
-import com.stormpath.sdk.utils.StringUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -39,7 +35,6 @@ import static android.widget.Toast.LENGTH_LONG;
 public class CreateAccount extends Activity implements OnServerCallCompleted {
 
     String ADD_USER_EXT = "/add_user";
-    String STORMPATH_EXT = "/stormpath";
     private OkHttpClient okHttpClient;
 
     @Override
@@ -58,19 +53,6 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         this.okHttpClient = new OkHttpClient.Builder().addNetworkInterceptor(httpLoggingInterceptor).build();
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // If not logged in, show stormpath activity.
-        /*
-        if (Stormpath.accessToken() == null) {
-            startActivity(new Intent(this, StormpathLoginActivity.class));
-        } else {
-            getNotes();
-        }
-        */
     }
 
     public void loginLinkClicked(View view) {
@@ -98,7 +80,6 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
 
             String text = jObject.toString();
 
-            //new ServerCall(CreateAccount.this).execute(text, CREATE_ACCOUNT_EXT, "POST");
             RegisterParams registerParams = new RegisterParams(firstNameText, lastNameText, emailText, passText);
             Stormpath.register(registerParams, new StormpathCallback<Void>() {
                 @Override
@@ -119,7 +100,6 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
                                     Log.d("FAILED", "Failed to get user profile");
                                 }
                             });
-
                         }
 
                         @Override
@@ -127,7 +107,6 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
                             Log.d("FAILURE", "could not login");
                         }
                     });
-
                 }
 
                 @Override
@@ -136,8 +115,6 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
                     Toast.makeText(CreateAccount.this, error.message(), LENGTH_LONG).show();
                 }
             });
-
-            //new ServerCall(CreateAccount.this).execute(text, ADD_USER_EXT, "POST");
         }
     }
 
@@ -182,15 +159,10 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
 
 
     private void add_user() {
-        Log.d("ADDING USER", "adding user, " + this.getString(R.string.SERVER_URL) + "/add_user");
-        RequestBody requestBody = new FormBody.Builder()
-                .add("notes", "some notes")
-                .build();
-        Request request = new Request.Builder()
-                .url(this.getString(R.string.SERVER_URL) + "/add_user")
-                .headers(buildStandardHeaders(Stormpath.accessToken()))
-                .get()
-                .build();
+        Log.d("ADDING USER", "adding user, " + this.getString(R.string.SERVER_URL) + ADD_USER_EXT);
+
+        OkhttpServerRequest request_object = new OkhttpServerRequest(this, ADD_USER_EXT);
+        Request request = request_object.getRequest();
 
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -210,14 +182,5 @@ public class CreateAccount extends Activity implements OnServerCallCompleted {
         });
     }
 
-    private Headers buildStandardHeaders(String accessToken) {
-        Headers.Builder builder = new Headers.Builder();
-        builder.add("Accept", "application/json");
-        if (StringUtils.isNotBlank(accessToken)) {
-            builder.add("Authorization", "Bearer " + accessToken);
-        }
-
-        return builder.build();
-    }
 }
 

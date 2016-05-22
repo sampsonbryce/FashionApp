@@ -14,9 +14,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by samps_000 on 2/23/2016.
- */
+
 public class ServerCall extends AsyncTask<String, Void, List> {
     private static final int HTTP_BAD_REQUEST = 400;
     private static final int HTTP_INTERNAL_ERROR = 500;

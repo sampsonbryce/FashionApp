@@ -5,17 +5,17 @@
     android:background="#FFFFFF">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
         android:id="@+id/userProfPic"
         android:layout_alignParentTop="true"
-        android:src="@drawable/jackson_hole_edited"
         android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
         android:maxHeight="50dp"
         android:maxWidth="50dp"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
         android:layout_alignParentStart="false"
         android:layout_alignTop="@+id/userProfPic"
         android:layout_toRightOf="@+id/userProfPic"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="@dimen/text_left_margin"
         android:textColor="#000000" />
 
     <TextView
@@ -41,7 +41,7 @@
         android:layout_toRightOf="@+id/userProfPic"
         android:layout_toEndOf="@+id/userProfPic"
         android:textColor="#7e7e7e"
-        android:layout_marginLeft="10dp" />
+        android:layout_marginLeft="@dimen/text_left_margin" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -60,17 +60,36 @@
         android:layout_width="fill_parent"
         android:layout_height="2dp"
         android:background="#d7d7d7"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:layout_below="@+id/userProfPic"
-        android:id="@+id/view" />
+        android:id="@+id/upper_view"
+        android:layout_marginBottom="5dp" />
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:id="@+id/feedPic"
-        android:layout_below="@+id/view"
-        android:src="@drawable/jackson_hole_edited"
+        android:layout_below="@+id/upper_view"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         />
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#d7d7d7"
+        android:layout_below="@+id/feedPic"
+        android:id="@+id/lower_view"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/descriptionText"
+        android:layout_below="@+id/lower_view"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="@dimen/text_left_margin" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -78,32 +97,67 @@
         android:weightSum="2"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_below="@+id/feedPic">
+        android:layout_below="@+id/descriptionText">
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Tips"
-            android:id="@+id/textView"
-            android:layout_below="@+id/feedPic"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:textColor="#000000"
-            android:background="#ff80ff" />
+            android:background="#ff80ff">
 
-        <TextView
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Tips"
+                android:id="@+id/textView"
+                android:layout_below="@+id/feedPic"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#000000" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Small Text"
+                android:id="@+id/tipsText"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:layout_marginRight="@dimen/text_left_margin" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Yes"
-            android:id="@+id/textView2"
-            android:textColor="#000000"
-            android:background="#26d9d9" />
+            android:background="#26d9d9"
+            android:onClick="yesClicked">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Yes"
+                android:id="@+id/textView2"
+                android:textColor="#000000" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Small Text"
+                android:id="@+id/yesText"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:layout_marginRight="@dimen/text_left_margin" />
+        </LinearLayout>
 
     </LinearLayout>
 
